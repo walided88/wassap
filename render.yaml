@@ -1,0 +1,9 @@
+version: 1
+services:
+  - type: web
+    name: wassap
+    env: node
+    buildCommand: npm install
+    startCommand: node server/server.js
+    rootDir: server
+    autoDeploy: true
