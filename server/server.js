@@ -267,6 +267,7 @@ app.put('/onlinWith', async (req, res) => {
 });
 
 // Démarrage du serveur sur le port 8080
-server.listen(8080, () => {
-  console.log('Serveur en écoute sur le port 8080');
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, () => {
+  console.log(`Serveur en écoute sur le port ${PORT}`);
 });
