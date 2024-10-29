@@ -1,6 +1,24 @@
-pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
-plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+pluginManagement {
+    includeBuild("../node_modules/@react-native/gradle-plugin")
+}
+
+plugins {
+    id("com.facebook.react.settings") version "0.70.0" // Assurez-vous que la version est correcte pour votre version de React Native
+}
+
+// Configurez les extensions si nécessaire
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand()
+}
+
 rootProject.name = 'Tchatsup'
+
+// Inclure l'application
 include ':app'
+
+// Inclure les modules nécessaires
 includeBuild('../node_modules/@react-native/gradle-plugin')
+
+// Assurez-vous d'inclure react-native-reanimated
+include ':react-native-reanimated'
+project(':react-native-reanimated').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-reanimated/android')
