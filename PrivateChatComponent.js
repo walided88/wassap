@@ -16,7 +16,7 @@ const PrivateChatComponent = () => {
   const [scrollDirection, setScrollDirection] = useState('up');
   const [buttonClicked, setButtonClicked] = useState(false);
 
-  const socketUrl = 'http://192.168.11.210:8080';
+  const socketUrl = 'https://wassap.onrender.com';
   const socketRef = useRef(null);
   const flatListRef = useRef(null);
   const inputRef = useRef(null);
@@ -26,60 +26,66 @@ const PrivateChatComponent = () => {
   const newMessage = useSelector((state) => state.string.value);
 
   useEffect(() => {
+    const isMounted = { current: true }; // Pour vérifier si le composant est encore monté
+
     const updateContactStatus = async (action) => {
-      const url = `http://192.168.11.210:8080/onlinWith`;
-      try {
-        await fetch(url, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ currentUser, selectedUser: action === 'leave' ? "void" : selectedUser })
-        });
-      } catch (error) {
-        alert(error.message);
-      }
+        const url = `https://wassap.onrender.com/onlinWith`;
+        try {
+            await fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentUser, selectedUser: action === 'leave' ? "void" : selectedUser })
+            });
+        } catch (error) {
+            alert(error.message);
+        }
     };
 
     const fetchMessages = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch('http://192.168.11.210:8080/privetMessages');
-        const data = await response.json();
-        const filteredMessages = data.filter(
-          msg => (msg.from === currentUser && msg.to === selectedUser) ||
-                 (msg.from === selectedUser && msg.to === currentUser)
-        );
-        setMessages(filteredMessages);
-      } catch (error) {
-        console.error('Erreur lors de la récupération des messages:', error);
-      } finally {
-        setIsLoading(false);
-      }
+        if (!isMounted.current) return; // Vérifier si le composant est monté
+        setIsLoading(true);
+        try {
+            const response = await fetch('https://wassap.onrender.com/privetMessages');
+            const data = await response.json();
+            const filteredMessages = data.filter(
+                msg => (msg.from === currentUser && msg.to === selectedUser) ||
+                       (msg.from === selectedUser && msg.to === currentUser)
+            );
+            if (isMounted.current) setMessages(filteredMessages);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des messages:', error);
+        } finally {
+            if (isMounted.current) setIsLoading(false);
+        }
     };
 
     fetchMessages();
+
     socketRef.current = io(socketUrl);
     socketRef.current.on('private_message', (data) => {
-      setMessages(prevMessages => [...prevMessages, data]);
-      dispatch(setNotification(data.text));
+        setMessages(prevMessages => [...prevMessages, data]);
+        dispatch(setNotification(data.text));
     });
     socketRef.current.emit('joinRoom', currentUser, selectedUser);
 
     return () => {
-      updateContactStatus('leave');
-      socketRef.current.disconnect();
-      dispatch(setString('false'));
-      dispatch(setNotification(''));
+        isMounted.current = false; // Indique que le composant va se démonter
+        updateContactStatus('leave');
+        socketRef.current.disconnect();
+        dispatch(setString('false'));
+        dispatch(setNotification(''));
     };
-  }, [socketUrl]);
+}, [socketUrl, currentUser, selectedUser, dispatch]);
 
-  useEffect(() => {
-    flatListRef.current?.scrollToEnd({ animated: true });
-  }, [messages]);
 
   const handleSendMessage = () => {
+    
     if (input.trim()) {
+      setScrollDirection('down');
+
       const messageData = { text: input, to: selectedUser, from: currentUser };
       socketRef.current.emit('send_private_message', messageData);
+      flatListRef.current?.scrollToEnd({ animated: true });
       setInput('');
     }
   };
@@ -89,6 +95,8 @@ const PrivateChatComponent = () => {
     setScrollDirection(currentScrollY > lastScrollY ? 'down' : 'up');
     setLastScrollY(currentScrollY);
     if (currentScrollY < lastScrollY) setButtonClicked(false);
+    setTimeout(() => setScrollDirection("up"), 3000);
+
   };
 
   const renderMessage = ({ item }) => (

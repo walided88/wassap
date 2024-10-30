@@ -77,30 +77,33 @@ io.on('connection', (socket) => {
 
 
 
-  // Envoi d'un message privé
-  socket.on('send_private_message', async ({ text, to, from }) => {
-    const recipientSocket = users.get(to); // Trouve la socket du destinataire**
-    socket.join(from); // Lors de la connexion d'un utilisateur, rejoins une room basée sur son ID
-    recipientSocket.join(from); // Lors de la connexion d'un utilisateur, rejoins une room basée sur son ID
+// Lorsque l'utilisateur rejoint une room privée
+socket.on('joinRoom', (currentUser, selectedUser) => {
+  const roomID = [currentUser, selectedUser].sort().join('_'); // Génère un ID unique pour la room
+  socket.join(roomID);
+  console.log(`${currentUser} a rejoint la room ${roomID}`);
+});
 
-    io.to(to).emit('private_message', { text, from });
-    socket.emit('private_message', { text, from });
-
-    if (recipientSocket) {
-
-      recipientSocket.emit('is_offline', { text, from });
-  } else {
-      console.log(`User ${to} is not connected`);
-      // Optionally handle sending a notification or storing the message
+// Envoi d'un message privé
+socket.on('send_private_message', async ({ text, to, from }) => {
+  const recipientSocket = users.get(to); // Trouve la socket du destinataire
+  const roomID = [from, to].sort().join('_'); // Utilisez la même room basée sur les IDs
+  
+  io.to(roomID).emit('private_message', { text, from }); // Envoie le message à tous les utilisateurs de la room
+  
+  if (!recipientSocket) {
+    console.log(`User ${to} is not connected`);
+    // Optionally handle sending a notification or storing the message
   }
-    // Sauvegarde du message privé dans MongoDB
-    try {
-      const newMessage = new PrivetMessage({ text, from, to });
-      await newMessage.save();
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde du message:', error);
-    }
-  });
+  
+  // Sauvegarde du message privé dans MongoDB
+  try {
+    const newMessage = new PrivetMessage({ text, from, to });
+    await newMessage.save();
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde du message:', error);
+  }
+});
 
   // Envoi d'un message public
   socket.on('public_message', async (data) => {
@@ -267,7 +270,6 @@ app.put('/onlinWith', async (req, res) => {
 });
 
 // Démarrage du serveur sur le port 8080
-const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
-  console.log(`Serveur en écoute sur le port ${PORT}`);
+server.listen(8080, () => {
+  console.log('Serveur en écoute sur le port 8080');
 });

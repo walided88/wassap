@@ -31,8 +31,8 @@ const HomeScreen = () => {
   
     // Détermine l'URL de la requête en fonction du mode (inscription ou connexion)
     const url = (isSignup
-      ? 'http://192.168.11.210:8080/signup' // URL pour l'inscription
-      : 'http://192.168.11.210:8080/login');// URL pour la connexion
+      ? 'https://wassap.onrender.com/signup' // URL pour l'inscription
+      : 'https://wassap.onrender.com/login');// URL pour la connexion
   
     try {
       // Envoie une requête POST au serveur pour l'inscription ou la connexion

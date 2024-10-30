@@ -8,7 +8,7 @@ const PrivateChat = ({ route }) => {
   const { username, selectedUser } = route.params;
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const socketUrl = 'http://192.168.11.210:8080'; // Remplace par l'URL de ton serveur Socket.IO
+  const socketUrl = 'https://wassap.onrender.com'; // Remplace par l'URL de ton serveur Socket.IO
   const socket = io(socketUrl);
   const isDarkMode = useSelector((state) => state.isDarkMode); // Get the current mode from the Redux store
   const dispatch = useDispatch(); // Get the dispatch function

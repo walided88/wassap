@@ -9,7 +9,7 @@ import io from 'socket.io-client';
 
 const ChatChoiceScreen = () => {
   const route = useRoute();
-  const socketUrl = 'http://192.168.11.210:8080';
+  const socketUrl = 'https://wassap.onrender.com';
   const socket = io(socketUrl);
   const navigation = useNavigation();
   const { username } = route.params; // Récupérer le nom d'utilisateur

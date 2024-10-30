@@ -26,7 +26,7 @@ const PrivateChatScreen = () => {
   const notifMessage = useSelector((state) => state.notification.value);
   const notifMessageRef = useRef(notifMessage);
   const [refresh, setRefresh] = useState(false); // État pour rafraîchir le composant
-  const socketUrl = 'http://192.168.11.210:8080';
+  const socketUrl = 'https://wassap.onrender.com';
   const socket = io(socketUrl);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const PrivateChatScreen = () => {
 
   const fetchUserInfo = async () => {
     try {
-      const response = await fetch(`http://192.168.11.210:8080/${usernameRef.current}`); // Utilise usernameRef.current
+      const response = await fetch(`https://wassap.onrender.com/${usernameRef.current}`); // Utilise usernameRef.current
       if (!response.ok) {
         throw new Error('Utilisateur non trouvé ou erreur lors de la requête');
       }
@@ -70,7 +70,7 @@ const PrivateChatScreen = () => {
     socket.on('is_offline', (data) => {
 
       if (newMessageRef.current === 'false') {
-        showNotification('Nouveau message', data.text);
+        showNotification('Nouveau message de: '+data.from, data.text);
         dispatch(setString("false")); // Assuming `setString` will update it to a non-triggering value
         // setNotif(data.text);
       }
@@ -98,7 +98,7 @@ const PrivateChatScreen = () => {
     }
   
     // Détermine l'URL de la requête en fonction du mode (inscription ou connexion)
-    const url =`http://192.168.11.210:8080/addContact` // URL pour l'inscription
+    const url =`https://wassap.onrender.com/addContact` // URL pour l'inscription
      
     try {
       // Envoie une requête POST au serveur pour l'inscription ou la connexion

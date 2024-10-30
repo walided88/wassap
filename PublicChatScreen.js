@@ -15,7 +15,7 @@ const PublicChatScreen = ({ route }) => {
   // État pour stocker le texte du message en cours de saisie
   const [input, setInput] = useState('');
   // URL du serveur socket
-  const socketUrl = 'http://192.168.11.210:8080';
+  const socketUrl = 'https://wassap.onrender.com';
   // Référence pour la connexion socket
   const socketRef = useRef();
   // Récupération du nom d'utilisateur depuis les paramètres de la route
@@ -42,7 +42,7 @@ const PublicChatScreen = ({ route }) => {
     // Fonction pour récupérer les messages publics depuis l'API
     const fetchMessages = async () => {
       try {
-        const response = await fetch('http://192.168.11.210:8080/publicMessages');
+        const response = await fetch('https://wassap.onrender.com/publicMessages');
         const data = await response.json();
         setMessages(data);
       } catch (error) {
