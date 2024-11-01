@@ -20,7 +20,7 @@ const PrivateChatComponent = () => {
   const [size, setSize] = useState(0);
   const [users, setUsers] = useState([]);
 
-  const socketUrl = 'http://192.168.66.210:8080';
+  const socketUrl = 'https://wassap.onrender.com';
   const socketRef = useRef(null);
   const flatListRef = useRef(null);
   const inputRef = useRef(null);
