@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, FlatList,TextInput } from 're
 import { useNavigation, useRoute } from '@react-navigation/native';
 import io from 'socket.io-client';
 import { useSelector, useDispatch } from 'react-redux';
-import { setString, toggleBoolean,setNotification } from './store';  // Importe les actions
+import { setString, toggleBoolean,setNotification ,setSizes} from './store';  // Importe les actions
 import { showNotification } from './Notification'; // Importation de la fonction
 import Notification from './Notification';
 
@@ -28,10 +28,16 @@ const PrivateChatScreen = () => {
   const [refresh, setRefresh] = useState(false); // État pour rafraîchir le composant
   const socketUrl = 'https://wassap.onrender.com';
   const socket = io(socketUrl);
+  const [size, setSize] = useState(0);
+  const theSize = useSelector((state) => state.size.value);
+  const theSizeRef = useRef(theSize);
+  const socketRef = useRef(null);
+
 
   useEffect(() => {
     newMessageRef.current = newMessage;
     notifMessageRef.current = notifMessage;
+    // showNotification('Nouveau message de: '+username);
 
   }, [newMessage,notifMessage]);
 
@@ -51,6 +57,14 @@ const PrivateChatScreen = () => {
   // Utilisation de useEffect pour appeler fetchUserInfo une seule fois lors du premier rendu
   useEffect(() => {
     fetchUserInfo();
+    socket.on('roomConnected', (data) => {
+      console.log(`PrivateChatScreen ; usersInRoomusersInRoomusersInRoom ${data.usersInRoom}`);
+
+      setSize(data.size)
+    });
+
+    console.log(`PrivateChatScreen ; data.sizedata.size :: ${size}`);
+
 
   }, []); // Le tableau vide [] garantit que l'effet est exécuté une seule fois au montage
 
@@ -60,20 +74,22 @@ const PrivateChatScreen = () => {
     setIsClicked(!isClicked);
   }
   useEffect(() => {
+   
+    socketRef.current = io(socketUrl);
 
-    socket.emit('register', username);
+    socketRef.current.emit('register', username);
 
-    socket.on('update_users', (userList) => {
+    socketRef.current.on('update_users', (userList) => {
       setUsers(userList);
     });
-
-    socket.on('is_offline', (data) => {
-
-      if (newMessageRef.current === 'false') {
-        showNotification('Nouveau message de: '+data.from, data.text);
-        dispatch(setString("false")); // Assuming `setString` will update it to a non-triggering value
-        // setNotif(data.text);
-      }
+    socketRef.current.on('send_pvMessage', (data) => {
+      setMessages(prevMessages => [...prevMessages, data]);
+  
+    });
+    socketRef.current.on('send_notification', (data) => {
+     
+        showNotification(`Nouveau message de: ${data.from}`, data.text);
+   
     });
     const theUser=users.find(el=>el.username==username)
     setUser(theUser);
@@ -125,11 +141,9 @@ const PrivateChatScreen = () => {
     setContactName("");
   };
   const handleUserSelect = (user) => {
-    dispatch(setString("true"));
 
+    dispatch(setString('true'));
 
-
-    
     navigation.navigate('PrivateChatComponent', {
       currentUser: username,
       selectedUser: user,

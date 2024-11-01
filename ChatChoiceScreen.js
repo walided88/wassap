@@ -22,13 +22,19 @@ const ChatChoiceScreen = () => {
   useEffect(() => {
     newMessageRef.current = newMessage;
   }, [newMessage,username]);
+
+
+  useEffect(() => {
+    socket.emit('register', username);
+  }, []);
+
+
   useEffect(() => {
 
-    socket.emit('register', username);
-    
   
-    socket.on('is_offline', (data) => {
-  
+    socket.on('private_message', (data) => {
+          dispatch(setNotification(data.text)); // Assuming `setString` will update it to a non-triggering value
+
       if (newMessageRef.current === 'false') {
         showNotification(`Nouveau Message de : ${data.from}`, data.text);
         dispatch(setString("false")); // Assuming `setString` will update it to a non-triggering value
@@ -45,7 +51,7 @@ const ChatChoiceScreen = () => {
     };
 
     
-  }, [username,newMessage]);
+  }, [username]);
 
 
   // console.log(myBoolean," ChatChoiceScreen: est statut contact et newMessage ",prop);

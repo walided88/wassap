@@ -60,22 +60,9 @@ const PublicChatScreen = ({ route }) => {
     socketRef.current.on('public_message', (data) => {
 
       setMessages((prevMessages) => [...prevMessages, data]);
-      // Exemple d'utilisation
-      // showNotification('Nouveau message', 'Vous avez reçu un nouveau message !');
-
-
+  
     });
-    // socketRef.current.on('is_offline', (data) => {
-  
-    //   if (newMessageRef.current === 'false') {
-    //     showNotification(`Nouveau Message de : ${data.from}`, data.text);
-    //     dispatch(setString("false")); // Assuming `setString` will update it to a non-triggering value
 
-    //   }
-    
-    // });
-  
-    // Déconnexion du socket lorsque le composant est démonté
     return () => {
     };
   }, [socketUrl]);

@@ -7,6 +7,7 @@ require('dotenv').config(); // Charge les variables d'environnement
 const {WassapUser,PrivetMessage,PublicMessage} = require('../models/User');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const rooms = {}; // Stocke les utilisateurs par room
 
 const app = express(); // Création de l'application Express
 const server = http.createServer(app); // Création du serveur HTTP
@@ -53,10 +54,11 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Événement de connexion via WebSocket
 io.on('connection', (socket) => {
-  console.log('Un utilisateur est connecté au serveur');
 
   // Lorsque l'utilisateur s'enregistre
   socket.on('register', (username) => {
+    console.log('Un utilisateur est connecté au serveur');
+
     users.set(username, socket); // Ajoute l'utilisateur au Map des utilisateurs connectés
     socket.username = username; // Associe le nom d'utilisateur à la socket
     io.emit('update_users', Array.from(users.keys())); // Envoie la liste mise à jour des utilisateurs à tous les clients
@@ -76,26 +78,81 @@ io.on('connection', (socket) => {
 
 
 
+  socket.on('joinRoom', (currentUser, selectedUser) => {
+    const roomID = [currentUser, selectedUser].sort().join('_'); // Génère un ID unique pour la room
+  
+    // Vérifie si la room existe déjà dans l'objet rooms, sinon la crée
+    if (!rooms[roomID]) {
+      rooms[roomID] = new Set();
+    }
+  
+    // Ajoute l'utilisateur courant dans la room
+    rooms[roomID].add(currentUser);
+    socket.join(roomID);
+    console.log(`Utilisateurs dans la salle ${roomID}:`, rooms[roomID] );
 
-// Lorsque l'utilisateur rejoint une room privée
-socket.on('joinRoom', (currentUser, selectedUser) => {
-  const roomID = [currentUser, selectedUser].sort().join('_'); // Génère un ID unique pour la room
-  socket.join(roomID);
-  console.log(`${currentUser} a rejoint la room ${roomID}`);
-});
+    const size = rooms[roomID].size;
+  // Parcourt et affiche tous les utilisateurs dans une room donnée
+
+
+// Exemple d'utilisation
+
+    // Emet l'événement roomConnected avec la taille actuelle de la room et l'ID de la room
+    socket.emit('roomConnected', { size, roomID });
+  });
+  
+  socket.on('leaveRoom', (currentUser, selectedUser) => {
+    const roomID = [currentUser, selectedUser].sort().join('_'); // Génère l'ID unique de la room
+  
+    // Vérifie si la room existe avant d'essayer de retirer un utilisateur
+    if (rooms[roomID]) {
+      // Retire l'utilisateur courant de la room
+      rooms[roomID].delete(currentUser);
+  
+      // Retire le socket de la room `roomID`
+      socket.leave(roomID);
+  
+      console.log(`${currentUser} a quitté la room ${roomID}, taille actuelle: ${rooms[roomID].size}`);
+  
+      // Si la room est vide, la supprimer de l'objet rooms pour libérer de la mémoire
+      if (rooms[roomID].size === 0) {
+        delete rooms[roomID];
+        console.log(`La room ${roomID} est maintenant vide et a été supprimée.`);
+      }
+    } else {
+      console.log(`La room ${roomID} n'existe pas ou est déjà vide.`);
+    }
+  });
+  
+  
+
 
 // Envoi d'un message privé
 socket.on('send_private_message', async ({ text, to, from }) => {
-  const recipientSocket = users.get(to); // Trouve la socket du destinataire
   const roomID = [from, to].sort().join('_'); // Utilisez la même room basée sur les IDs
-  
-  io.to(roomID).emit('private_message', { text, from }); // Envoie le message à tous les utilisateurs de la room
-  
-  if (!recipientSocket) {
-    console.log(`User ${to} is not connected`);
-    // Optionally handle sending a notification or storing the message
+  const size = rooms[roomID]?.size || 0; // Assurez-vous que la taille de la room est définie
+
+  // Récupération des sockets pour les utilisateurs de la room
+  const userSockets = roomID.split('_').map(user => users.get(user));
+  const recipientSocket = users.get(to); // Socket du destinataire
+  const senderSocket = users.get(from);  // Socket de l'expéditeur
+  io.to(roomID).emit('send_pvMessage', { text, to, from });
+
+  if (size !== 2) {
+    // Si la room n'a pas exactement 2 utilisateurs, trouvez le bon destinataire
+    if (recipientSocket && userSockets.includes(recipientSocket)) {
+
+      // Envoyez la notification au destinataire si sa socket existe
+      io.to(recipientSocket.id).emit('send_notification', { text, from, size });
+      console.log(`Notification sent to user ${to} with socket ID ${recipientSocket.id}`);
+    } else if (senderSocket) {
+
+      // Si le destinataire n'est pas présent, envoyez la notification à l'expéditeur
+      io.to(senderSocket.id).emit('send_notification', { text, from, size });
+      console.log(`Notification sent to sender ${from} with socket ID ${senderSocket.id}`);
+    }
   }
-  
+
   // Sauvegarde du message privé dans MongoDB
   try {
     const newMessage = new PrivetMessage({ text, from, to });
@@ -104,6 +161,7 @@ socket.on('send_private_message', async ({ text, to, from }) => {
     console.error('Erreur lors de la sauvegarde du message:', error);
   }
 });
+
 
   // Envoi d'un message public
   socket.on('public_message', async (data) => {

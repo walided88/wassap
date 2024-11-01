@@ -3,7 +3,8 @@ import { View, Text, TextInput, KeyboardAvoidingView, ImageBackground, FlatList,
 import { useNavigation, useRoute } from '@react-navigation/native';
 import io from 'socket.io-client';
 import { useSelector, useDispatch } from 'react-redux';
-import { setString, toggleBoolean, setNotification } from './store';
+import { setString, toggleBoolean, setNotification,setSizes } from './store';
+import { showNotification } from './Notification'; // Importation de la fonction
 
 const PrivateChatComponent = () => {
   const navigation = useNavigation();
@@ -15,77 +16,108 @@ const PrivateChatComponent = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [scrollDirection, setScrollDirection] = useState('up');
   const [buttonClicked, setButtonClicked] = useState(false);
+  const [roomId, setRoomID] = useState('');
+  const [size, setSize] = useState(0);
+  const [users, setUsers] = useState([]);
 
-  const socketUrl = 'https://wassap.onrender.com';
+  const socketUrl = 'http://192.168.66.210:8080';
   const socketRef = useRef(null);
   const flatListRef = useRef(null);
   const inputRef = useRef(null);
   const dispatch = useDispatch();
+  const socket = io(socketUrl);
 
   const myBoolean = useSelector((state) => state.boolean.value);
   const newMessage = useSelector((state) => state.string.value);
+  const theSize = useSelector((state) => state.size.value);
+  const theSizeRef = useRef(theSize);
+
+
+  // console.log(`ddddddddd PrivateChatScreen theSizetheSize   ${theSizeRef.current}`);
+
 
   useEffect(() => {
-    const isMounted = { current: true }; // Pour vérifier si le composant est encore monté
-
     const updateContactStatus = async (action) => {
-        const url = `https://wassap.onrender.com/onlinWith`;
-        try {
-            await fetch(url, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ currentUser, selectedUser: action === 'leave' ? "void" : selectedUser })
-            });
-        } catch (error) {
-            alert(error.message);
-        }
+      const url = `https://wassap.onrender.com/onlinWith`;
+      try {
+        await fetch(url, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentUser, selectedUser: action === 'leave' ? "void" : selectedUser })
+        });
+      } catch (error) {
+        alert(error.message);
+      }
     };
-
+  
     const fetchMessages = async () => {
-        if (!isMounted.current) return; // Vérifier si le composant est monté
-        setIsLoading(true);
-        try {
-            const response = await fetch('https://wassap.onrender.com/privetMessages');
-            const data = await response.json();
-            const filteredMessages = data.filter(
-                msg => (msg.from === currentUser && msg.to === selectedUser) ||
-                       (msg.from === selectedUser && msg.to === currentUser)
-            );
-            if (isMounted.current) setMessages(filteredMessages);
-        } catch (error) {
-            console.error('Erreur lors de la récupération des messages:', error);
-        } finally {
-            if (isMounted.current) setIsLoading(false);
-        }
+      setIsLoading(true);
+      try {
+        const response = await fetch('https://wassap.onrender.com/privetMessages');
+        const data = await response.json();
+        const filteredMessages = data.filter(
+          msg => (msg.from === currentUser && msg.to === selectedUser) ||
+                 (msg.from === selectedUser && msg.to === currentUser)
+        );
+        setMessages(filteredMessages);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des messages:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
-
+  
     fetchMessages();
-
+  
     socketRef.current = io(socketUrl);
-    socketRef.current.on('private_message', (data) => {
-        setMessages(prevMessages => [...prevMessages, data]);
-        dispatch(setNotification(data.text));
+    socketRef.current .emit('register', currentUser);
+    socket.on('update_users', (userList) => {
+      setUsers(userList);
     });
-    socketRef.current.emit('joinRoom', currentUser, selectedUser);
+  
+    socketRef.current.on('send_pvMessage', (data) => {
+      setMessages(prevMessages => [...prevMessages, data]);
+  
+    });
+   
+  socketRef.current.on('send_notification', (data) => {
 
+      showNotification(`Nouveau message de: ${data.from}`, data.text);
+    
+  });
     return () => {
-        isMounted.current = false; // Indique que le composant va se démonter
-        updateContactStatus('leave');
-        socketRef.current.disconnect();
-        dispatch(setString('false'));
-        dispatch(setNotification(''));
+      
+      dispatch(setString('false'));
+      updateContactStatus('leave');
+      dispatch(setNotification(''));
+      
+      // Emission de l'événement leaveRoom
+      socketRef.current.emit('leaveRoom',  currentUser, selectedUser );
+      
+  
     };
-}, [socketUrl, currentUser, selectedUser, dispatch]);
+  
+  }, [socketUrl, currentUser, selectedUser]);
+  
+  useEffect(() => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
 
 
+
+  useEffect(() => {
+    console.log(`PrivateChatComponent sizesizesize ${size}`);
+
+
+      socketRef.current.emit('joinRoom', currentUser, selectedUser);
+  
+  }, []);
   const handleSendMessage = () => {
     
     if (input.trim()) {
-      setScrollDirection('down');
-
       const messageData = { text: input, to: selectedUser, from: currentUser };
+
       socketRef.current.emit('send_private_message', messageData);
-      flatListRef.current?.scrollToEnd({ animated: true });
       setInput('');
     }
   };
@@ -95,8 +127,6 @@ const PrivateChatComponent = () => {
     setScrollDirection(currentScrollY > lastScrollY ? 'down' : 'up');
     setLastScrollY(currentScrollY);
     if (currentScrollY < lastScrollY) setButtonClicked(false);
-    setTimeout(() => setScrollDirection("up"), 3000);
-
   };
 
   const renderMessage = ({ item }) => (
