@@ -50,6 +50,148 @@ const verifyPassword = async (password, hashedPassword) => {
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connecté à MongoDB'))
   .catch((error) => console.error('Erreur de connexion à MongoDB:', error));
+// Récupération des messages publics via une requête HTTP GET
+app.get('/publicMessages', async (req, res) => {
+  try {
+    const messages = await PublicMessage.find();
+    res.json(messages); // Envoie des messages publics en réponse
+  } catch (error) {
+    res.status(500).send('Erreur lors de la récupération des messages');
+  }
+});
+
+// Récupération des messages privés via une requête HTTP GET
+app.get('/privetMessages', async (req, res) => {
+  try {
+    const messages = await PrivetMessage.find();
+    res.json(messages); // Envoie des messages privés en réponse
+  } catch (error) {
+    res.status(500).send('Erreur lors de la récupération des messages');
+  }
+});
+
+
+
+
+// Route pour la connexion de l'utilisateur
+app.post('/logins', async (req, res) => {
+  
+  try {
+    const { username, password } = req.body;
+    const hashedPassword = await hashPassword(password);
+    const isMatch = await verifyPassword(password, hashedPassword);
+
+    // Vérifie si l'utilisateur existe et si le mot de passe est correct
+    const user = await WassapUser.findOne({ username });
+    if ((user.username!==username)|| (!isMatch)) {
+      return res.status(400).json({ message: 'Invalid username or password' });
+    }
+
+    res.status(200).json({ message: 'Login successful', user }); // Réponse en cas de succès
+  } catch (error) {
+    res.status(500).json({message: 'Invalid username or password' });
+  }
+});
+
+
+// Route pour l'inscription d'un nouvel utilisateur
+app.post('/signups', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const hashedPassword = await hashPassword(password);
+
+    // Vérifie si l'utilisateur existe déjà
+    const userExist = await WassapUser.findOne({ username });
+    if (userExist) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Crée un nouvel utilisateur et le sauvegarde dans la base de données
+    const newUser = new WassapUser({ username, password:hashedPassword });
+    await newUser.save();
+
+    res.status(201).json({ message: 'Signup successful', newUser });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+
+
+
+// Récupération des informations d'un utilisateur spécifique par son nom d'utilisateur
+app.get('/:username', async (req, res) => {
+const { username } = req.params; // Récupère le paramètre 'username' depuis l'URL
+try {
+  const user = await WassapUser.findOne({ username }); // Recherche de l'utilisateur dans la base de données
+  if (!user) {
+    return res.status(404).json({ message: 'Utilisateur non trouvé' }); // Si l'utilisateur n'est pas trouvé
+  }
+  res.json(user); // Envoie des informations de l'utilisateur en réponse
+} catch (error) {
+  res.status(500).send('Erreur lors de la récupération de l\'utilisateur'); // Gestion des erreurs
+}
+});
+
+// Route pour ajouter un contact à un utilisateur
+app.put('/addContact', async (req, res) => {
+const { contactName, username } = req.body; // Récupération du contact et de l'utilisateur à partir du corps de la requête
+console.log(contactName, username, "est le contactName et username reçus en serveur");
+
+try {
+  // Recherche de l'utilisateur avec le contactName (en supposant que contactName est le username du contact)
+  const contact = await WassapUser.findOne({ username: contactName });
+  const user = await WassapUser.findOne({ username });
+
+  console.log(contact, "est le contact reçu en serveur");
+  console.log("L'utilisateur reçu en serveur est", user);
+
+  if (!contact) {
+    return res.status(400).json({ message: 'Aucun utilisateur trouvé avec ce nom d’utilisateur' });
+  }
+
+  // Vérifier si le contact existe déjà dans la liste des contacts de l'utilisateur
+  const isExist = user.contacts.some(c => c.contactName === contact.username);
+
+  if (isExist) {
+    return res.status(400).json({ message: 'L’utilisateur existe déjà dans les contacts.' });
+  }
+
+  // Ajoute le contact à la liste des contacts de l'utilisateur
+  user.contacts.push({ contactName: contact.username, timestamp: Date.now() });
+  await user.save(); // Sauvegarde les modifications
+
+  res.status(200).json({ message: 'Contact ajouté avec succès.' });
+} catch (error) {
+  res.status(500).json({ message: error.message });
+}
+});
+
+app.put('/onlinWith', async (req, res) => {
+const { currentUser, selectedUser } = req.body; // Récupération du contact et de l'utilisateur à partir du corps de la requête
+
+try {
+  // Recherche de l'utilisateur avec le contactName (en supposant que contactName est le username du contact)
+  const contact = await WassapUser.findOne({ username: selectedUser });
+  const user = await WassapUser.findOne({ username: currentUser });
+
+  if (!contact) {
+    user.onlineWith = "void";
+    await user.save(); // Sauvegarde les modifications
+  }
+  else{
+     // Ajoute le contact à la liste des contacts de l'utilisateur
+  user.onlineWith = contact._id;
+  await user.save(); // Sauvegarde les modifications
+
+  }
+
+  res.status(200).json({ message: 'Contact ajouté avec succès.' });
+} catch (error) {
+  res.status(500).json({ message: error.message });
+}
+});
 
 
 // Événement de connexion via WebSocket
@@ -177,149 +319,7 @@ socket.on('send_private_message', async ({ text, to, from }) => {
     }
   });
 
-  // Récupération des messages publics via une requête HTTP GET
-  app.get('/publicMessages', async (req, res) => {
-    try {
-      const messages = await PublicMessage.find();
-      res.json(messages); // Envoie des messages publics en réponse
-    } catch (error) {
-      res.status(500).send('Erreur lors de la récupération des messages');
-    }
-  });
-
-  // Récupération des messages privés via une requête HTTP GET
-  app.get('/privetMessages', async (req, res) => {
-    try {
-      const messages = await PrivetMessage.find();
-      res.json(messages); // Envoie des messages privés en réponse
-    } catch (error) {
-      res.status(500).send('Erreur lors de la récupération des messages');
-    }
-  });
-
-
-
-
-  // Route pour la connexion de l'utilisateur
-  app.post('/login', async (req, res) => {
-    
-    try {
-      const { username, password } = req.body;
-      const hashedPassword = await hashPassword(password);
-      const isMatch = await verifyPassword(password, hashedPassword);
-
-      // Vérifie si l'utilisateur existe et si le mot de passe est correct
-      const user = await WassapUser.findOne({ username });
-      if ((user.username!==username)|| (!isMatch)) {
-        return res.status(400).json({ message: 'Invalid username or password' });
-      }
-
-      res.status(200).json({ message: 'Login successful', user }); // Réponse en cas de succès
-    } catch (error) {
-      res.status(500).json({message: 'Invalid username or password' });
-    }
-  });
-
-
-  // Route pour l'inscription d'un nouvel utilisateur
-  app.post('/signup', async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      const hashedPassword = await hashPassword(password);
-
-      // Vérifie si l'utilisateur existe déjà
-      const userExist = await WassapUser.findOne({ username });
-      if (userExist) {
-        return res.status(400).json({ message: 'User already exists' });
-      }
-
-      // Crée un nouvel utilisateur et le sauvegarde dans la base de données
-      const newUser = new WassapUser({ username, password:hashedPassword });
-      await newUser.save();
-
-      res.status(201).json({ message: 'Signup successful', newUser });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-
-
-
-
-// Récupération des informations d'un utilisateur spécifique par son nom d'utilisateur
-app.get('/:username', async (req, res) => {
-  const { username } = req.params; // Récupère le paramètre 'username' depuis l'URL
-  try {
-    const user = await WassapUser.findOne({ username }); // Recherche de l'utilisateur dans la base de données
-    if (!user) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé' }); // Si l'utilisateur n'est pas trouvé
-    }
-    res.json(user); // Envoie des informations de l'utilisateur en réponse
-  } catch (error) {
-    res.status(500).send('Erreur lors de la récupération de l\'utilisateur'); // Gestion des erreurs
-  }
-});
-
-  // Route pour ajouter un contact à un utilisateur
-app.put('/addContact', async (req, res) => {
-  const { contactName, username } = req.body; // Récupération du contact et de l'utilisateur à partir du corps de la requête
-  console.log(contactName, username, "est le contactName et username reçus en serveur");
-
-  try {
-    // Recherche de l'utilisateur avec le contactName (en supposant que contactName est le username du contact)
-    const contact = await WassapUser.findOne({ username: contactName });
-    const user = await WassapUser.findOne({ username });
-
-    console.log(contact, "est le contact reçu en serveur");
-    console.log("L'utilisateur reçu en serveur est", user);
-
-    if (!contact) {
-      return res.status(400).json({ message: 'Aucun utilisateur trouvé avec ce nom d’utilisateur' });
-    }
-
-    // Vérifier si le contact existe déjà dans la liste des contacts de l'utilisateur
-    const isExist = user.contacts.some(c => c.contactName === contact.username);
-
-    if (isExist) {
-      return res.status(400).json({ message: 'L’utilisateur existe déjà dans les contacts.' });
-    }
-
-    // Ajoute le contact à la liste des contacts de l'utilisateur
-    user.contacts.push({ contactName: contact.username, timestamp: Date.now() });
-    await user.save(); // Sauvegarde les modifications
-
-    res.status(200).json({ message: 'Contact ajouté avec succès.' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-app.put('/onlinWith', async (req, res) => {
-  const { currentUser, selectedUser } = req.body; // Récupération du contact et de l'utilisateur à partir du corps de la requête
-
-  try {
-    // Recherche de l'utilisateur avec le contactName (en supposant que contactName est le username du contact)
-    const contact = await WassapUser.findOne({ username: selectedUser });
-    const user = await WassapUser.findOne({ username: currentUser });
-
-    if (!contact) {
-      user.onlineWith = "void";
-      await user.save(); // Sauvegarde les modifications
-    }
-    else{
-       // Ajoute le contact à la liste des contacts de l'utilisateur
-    user.onlineWith = contact._id;
-    await user.save(); // Sauvegarde les modifications
-
-    }
-
-    res.status(200).json({ message: 'Contact ajouté avec succès.' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
+  
   // Gestion de la déconnexion d'un utilisateur
   socket.on('disconnect', () => {
     users.delete(socket.username); // Supprime l'utilisateur de la Map
