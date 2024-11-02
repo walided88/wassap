@@ -26,6 +26,8 @@ const HomeScreen = () => {
     // Vérifie si les champs username et password ne sont pas vides
     if (!username.trim() || !password.trim()) {
       alert('Veuillez remplir tous les champs.'); // Alerte si les champs sont vides
+      setIsLoading(false);
+
       return;
     }
   
@@ -72,6 +74,8 @@ const HomeScreen = () => {
     const LoadingSpinner = () => {
       return (
         <View style={styles.loadingContainer}>
+          <Text style={styles.loadingContainer}>temps d'attente éstimé est de 1 min</Text>
+
           <ActivityIndicator size="large" color="#25D366" />
         </View>
       );
