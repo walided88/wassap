@@ -9,7 +9,7 @@ import { showNotification } from './Notification'; // Importation de la fonction
 const PrivateChatComponent = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { currentUser, selectedUser } = route.params;
+  const { currentUser, selectedUser,isOnline } = route.params;
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -82,7 +82,7 @@ const PrivateChatComponent = () => {
    
   socketRef.current.on('send_notification', (data) => {
 
-      showNotification(`Nouveau message de: ${data.from}`, data.text);
+    if(isOnline)  showNotification(`Nouveau message de: ${data.from}`, data.text);
     
   });
     return () => {

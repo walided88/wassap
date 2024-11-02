@@ -140,13 +140,14 @@ const PrivateChatScreen = () => {
     }
     setContactName("");
   };
-  const handleUserSelect = (user) => {
+  const handleUserSelect = (user,statut) => {
 
     dispatch(setString('true'));
 
     navigation.navigate('PrivateChatComponent', {
       currentUser: username,
       selectedUser: user,
+      isOnline: statut,
     });
 
       socket.disconnect();
@@ -184,7 +185,7 @@ const PrivateChatScreen = () => {
           const isOnline = users.some((el) => el === item.contactName);
 
           return (
-            <TouchableOpacity onPress={() => handleUserSelect(item.contactName)} style={styles.contactButton}>
+            <TouchableOpacity onPress={() => handleUserSelect(item.contactName,isOnline)} style={styles.contactButton}>
                 <Text
                   style={[
                     styles.contactButtonText,

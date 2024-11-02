@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { setString, toggleBoolean } from './store';  // Importe les actions
 import { showNotification } from './Notification'; // Importation de la fonction
+import LoadingSpinner from './LoadingSpinner'; // Importation de la fonction
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -71,15 +72,7 @@ const HomeScreen = () => {
         alert(error.message); // Affiche un message d'erreur à l'utilisateur
       }
     };
-    const LoadingSpinner = () => {
-      return (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingContainer}>temps d'attente éstimé est de 1 min</Text>
 
-          <ActivityIndicator size="large" color="#25D366" />
-        </View>
-      );
-    };
   
 
   return (
