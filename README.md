@@ -1,79 +1,73 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
-# Getting Started
+# Chat Application
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+A real-time chat application that supports private and public messaging between registered users. This application enables users to engage in seamless communication while staying connected with their contacts. It’s built with React Native and utilizes MongoDB for persistent data storage. Users can receive notifications for private messages, view online contacts, and add new contacts to expand their network.
 
-## Step 1: Start the Metro Server
+## Features
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+- **Public and Private Chat**: Engage in both public chat rooms and private conversations.
+- **Real-time Notifications**: Receive instant notifications for private messages, displaying the sender's name and the message content.
+- **Add New Contacts**: Expand your network by adding new contacts to your chat list.
+- **View Online Status**: See who is currently online to know when contacts are available.
 
-To start Metro, run the following command from the _root_ of your React Native project:
+## Installation
 
-```bash
-# using npm
-npm start
+### Running the App with Expo
 
-# OR using Yarn
-yarn start
-```
+To run the app with Expo, follow these steps:
 
-## Step 2: Start your Application
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/walided88/wassap.git
+   cd wassap
+   ```
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+2. **Install dependencies**:
+   Make sure you have `node` and `npm` or `yarn` installed. Run:
+   ```bash
+   npm install
+   ```
+   or
+   ```bash
+   yarn install
+   ```
 
-### For Android
+3. **Start the Expo server**:
+   ```bash
+   npx expo start
+   ```
+   This will open Expo Developer Tools in your browser. You can run the app on an Android or iOS device via the Expo Go app, or use an emulator.
 
-```bash
-# using npm
-npm run android
+### Running the APK on Android
 
-# OR using Yarn
-yarn android
-```
+If you prefer to run the app as a standalone application, follow these steps to download and install the APK:
 
-### For iOS
+1. **Download the APK**:
+   Go to the [Releases](https://github.com/walided88/wassap/releases/tag/v1.0.0-alpha) section of this repository and download the latest APK file.
 
-```bash
-# using npm
-npm run ios
+2. **Install the APK**:
+   Transfer the APK to your Android device and install it. Make sure to enable installation from unknown sources in your device’s settings.
 
-# OR using Yarn
-yarn ios
-```
+3. **Run the App**:
+   Open the app from your device's application list and sign in to start chatting!
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+## Technology Stack
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+- **Frontend**: React Native (Expo)
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB for persistent storage
+- **Real-time Communication**: WebSocket for real-time updates
 
-## Step 3: Modifying your App
+## Contributing
 
-Now that you have successfully run the app, let's modify it.
+Contributions are welcome! Please follow these steps:
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+1. Fork the repository.
+2. Create a new branch with your feature or bug fix.
+3. Submit a pull request.
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+## License
 
-## Congratulations! :tada:
+This project is licensed under the MIT License.
 
-You've successfully run and modified your React Native App. :partying_face:
 
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
