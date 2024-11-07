@@ -27,11 +27,6 @@ const PrivateChatComponent = () => {
   const dispatch = useDispatch();
   const socket = io(socketUrl);
 
-  const myBoolean = useSelector((state) => state.boolean.value);
-  const newMessage = useSelector((state) => state.string.value);
-  const theSize = useSelector((state) => state.size.value);
-  const theSizeRef = useRef(theSize);
-
 
   // console.log(`ddddddddd PrivateChatScreen theSizetheSize   ${theSizeRef.current}`);
 

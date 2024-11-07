@@ -12,7 +12,7 @@ const PrivateChatScreen = () => {
   const route = useRoute();
   const inputRef = useRef(null);
 
-  const { username,newMessageRef } = route.params;
+  const { username } = route.params;
   const [users, setUsers] = useState([]);
   const [user, setUser] = useState("");
   const [userInfo, setUserInfo] = useState('');
@@ -22,24 +22,15 @@ const PrivateChatScreen = () => {
   const [notif, setNotif] = useState('');
   const dispatch = useDispatch();
   const myBoolean = useSelector((state) => state.boolean.value);
-  const newMessage = useSelector((state) => state.string.value);
   const notifMessage = useSelector((state) => state.notification.value);
   const notifMessageRef = useRef(notifMessage);
   const [refresh, setRefresh] = useState(false); // État pour rafraîchir le composant
   const socketUrl = 'https://wassap.onrender.com';
   const socket = io(socketUrl);
   const [size, setSize] = useState(0);
-  const theSize = useSelector((state) => state.size.value);
-  const theSizeRef = useRef(theSize);
+
   const socketRef = useRef(null);
 
-
-  useEffect(() => {
-    newMessageRef.current = newMessage;
-    notifMessageRef.current = notifMessage;
-    // showNotification('Nouveau message de: '+username);
-
-  }, [newMessage,notifMessage]);
 
   const fetchUserInfo = async () => {
     try {
