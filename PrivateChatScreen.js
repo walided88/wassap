@@ -5,7 +5,6 @@ import io from 'socket.io-client';
 import { useSelector, useDispatch } from 'react-redux';
 import { setString, toggleBoolean,setNotification ,setSizes} from './store';  // Importe les actions
 import { showNotification } from './Notification'; // Importation de la fonction
-import Notification from './Notification';
 
 const PrivateChatScreen = () => {
   const navigation = useNavigation();
