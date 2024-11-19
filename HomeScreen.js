@@ -13,9 +13,6 @@ const HomeScreen = () => {
   const [password, setPassword] = useState('');
   const [isSignup, setIsSignup] = useState(false); // État pour basculer entre login et signup
   const [isLoading, setIsLoading] = useState(false);
-  const dispatch = useDispatch();
-  const myBoolean = useSelector((state) => state.boolean.value);
-  const newMessage = useSelector((state) => state.string.value);
 
   
 

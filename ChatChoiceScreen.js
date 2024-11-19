@@ -13,15 +13,7 @@ const ChatChoiceScreen = () => {
   const socket = io(socketUrl);
   const navigation = useNavigation();
   const { username } = route.params; // Récupérer le nom d'utilisateur
-  const myBoolean = useSelector((state) => state.boolean.value);
-  const newMessage = useSelector((state) => state.string.value);
   const dispatch = useDispatch();
-  const newMessageRef = useRef(newMessage);
-
-  // if(newMessage=='xx' ) showNotification('Nouveau message', 'Vous avez reçu un nouveau message !');
-  useEffect(() => {
-    newMessageRef.current = newMessage;
-  }, [newMessage,username]);
 
 
   useEffect(() => {
@@ -35,12 +27,7 @@ const ChatChoiceScreen = () => {
     socket.on('private_message', (data) => {
           dispatch(setNotification(data.text)); // Assuming `setString` will update it to a non-triggering value
 
-      if (newMessageRef.current === 'false') {
-        showNotification(`Nouveau Message de : ${data.from}`, data.text);
-        dispatch(setString("false")); // Assuming `setString` will update it to a non-triggering value
-        dispatch(setNotification(data.text)); // Assuming `setString` will update it to a non-triggering value
-
-      }
+   
     
     });
   
@@ -63,13 +50,13 @@ const ChatChoiceScreen = () => {
       <Text style={styles.title}>Choisissez un type de chat</Text>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('PublicChat', { username,newMessageRef })}
+        onPress={() => navigation.navigate('PublicChat', { username })}
       >
         <Text style={styles.buttonText}>Chat Public</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('PrivateChat', { username,newMessageRef })}
+        onPress={() => navigation.navigate('PrivateChat', { username })}
       >
         <Text style={styles.buttonText}>Chat Privé</Text>
       </TouchableOpacity>
