@@ -58,10 +58,7 @@ const PrivateChatScreen = () => {
     socketRef.current.on('update_users', (userList) => {
       setUsers(userList);
     });
-    socketRef.current.on('send_pvMessage', (data) => {
-      setMessages(prevMessages => [...prevMessages, data]);
-  
-    });
+ 
     socketRef.current.on('send_notification', (data) => {
      
         showNotification(`Nouveau message de: ${data.from}`, data.text);

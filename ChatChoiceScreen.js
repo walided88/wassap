@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation,useRoute } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import io from 'socket.io-client';
+import { showNotification } from './Notification'; // Importation de la fonction
 
 const ChatChoiceScreen = () => {
   const route = useRoute();
@@ -15,8 +16,15 @@ const ChatChoiceScreen = () => {
 
   useEffect(() => {
     socket.emit('register', username);
+    
   }, []);
-
+  useEffect(() => {
+    socket.on('send_notification', (data) => {
+     
+      showNotification(`Nouveau message de: ${data.from}`, data.text);
+ 
+  });
+  }, [username]);
 
   return (
     <View style={styles.container}>
