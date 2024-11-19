@@ -10,7 +10,6 @@ import Notification from './Notification';
 const PrivateChatScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const inputRef = useRef(null);
 
   const { username,newMessage } = route.params;
   const [users, setUsers] = useState([]);
@@ -19,17 +18,9 @@ const PrivateChatScreen = () => {
   const usernameRef = useRef(username); // Utilisation de useRef pour stocker le username
   const [isClicked, setIsClicked] = useState(false);
   const [contactName, setContactName] = useState('');
-  const [notif, setNotif] = useState('');
   const dispatch = useDispatch();
-  const myBoolean = useSelector((state) => state.boolean.value);
-  const notifMessage = useSelector((state) => state.notification.value);
-  const notifMessageRef = useRef(notifMessage);
-  const [refresh, setRefresh] = useState(false); // État pour rafraîchir le composant
-  const socketUrl = 'https://wassap.onrender.com';
+ const socketUrl = 'https://wassap.onrender.com';
   const socket = io(socketUrl);
-  const [size, setSize] = useState(0);
-  const theSize = useSelector((state) => state.size.value);
-  const theSizeRef = useRef(theSize);
   const socketRef = useRef(null);
 
 
