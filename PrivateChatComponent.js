@@ -27,23 +27,17 @@ const PrivateChatComponent = () => {
   const dispatch = useDispatch();
   const socket = io(socketUrl);
 
+  const myBoolean = useSelector((state) => state.boolean.value);
+  const newMessage = useSelector((state) => state.string.value);
+  const theSize = useSelector((state) => state.size.value);
+  const theSizeRef = useRef(theSize);
+
 
   // console.log(`ddddddddd PrivateChatScreen theSizetheSize   ${theSizeRef.current}`);
 
 
   useEffect(() => {
-    const updateContactStatus = async (action) => {
-      const url = `https://wassap.onrender.com/onlinWith`;
-      try {
-        await fetch(url, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ currentUser, selectedUser: action === 'leave' ? "void" : selectedUser })
-        });
-      } catch (error) {
-        alert(error.message);
-      }
-    };
+
   
     const fetchMessages = async () => {
       setIsLoading(true);
@@ -82,8 +76,6 @@ const PrivateChatComponent = () => {
   });
     return () => {
       
-      dispatch(setString('false'));
-      updateContactStatus('leave');
       dispatch(setNotification(''));
       
       // Emission de l'événement leaveRoom
