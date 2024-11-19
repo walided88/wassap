@@ -3,8 +3,6 @@ import React, { useEffect, useState,useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation,useRoute } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
-import { setString, toggleBoolean,setNotification } from './store';  // Importe les actions
-import { showNotification } from './Notification'; // Importation de la fonction
 import io from 'socket.io-client';
 
 const ChatChoiceScreen = () => {
@@ -13,7 +11,6 @@ const ChatChoiceScreen = () => {
   const socket = io(socketUrl);
   const navigation = useNavigation();
   const { username } = route.params; // Récupérer le nom d'utilisateur
-  const myBoolean = useSelector((state) => state.boolean.value);
   const newMessage = useSelector((state) => state.string.value);
 
   useEffect(() => {
