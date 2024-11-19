@@ -1,10 +1,7 @@
 // HomeScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, ActivityIndicator, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useSelector, useDispatch } from 'react-redux';
-import { setString, toggleBoolean } from './store';  // Importe les actions
-import { showNotification } from './Notification'; // Importation de la fonction
 import LoadingSpinner from './LoadingSpinner'; // Importation de la fonction
 
 const HomeScreen = () => {
@@ -13,6 +10,7 @@ const HomeScreen = () => {
   const [password, setPassword] = useState('');
   const [isSignup, setIsSignup] = useState(false); // État pour basculer entre login et signup
   const [isLoading, setIsLoading] = useState(false);
+
 
   
 

@@ -12,7 +12,7 @@ const PrivateChatScreen = () => {
   const route = useRoute();
   const inputRef = useRef(null);
 
-  const { username } = route.params;
+  const { username,newMessage } = route.params;
   const [users, setUsers] = useState([]);
   const [user, setUser] = useState("");
   const [userInfo, setUserInfo] = useState('');
@@ -28,8 +28,10 @@ const PrivateChatScreen = () => {
   const socketUrl = 'https://wassap.onrender.com';
   const socket = io(socketUrl);
   const [size, setSize] = useState(0);
-
+  const theSize = useSelector((state) => state.size.value);
+  const theSizeRef = useRef(theSize);
   const socketRef = useRef(null);
+
 
 
   const fetchUserInfo = async () => {
@@ -48,14 +50,6 @@ const PrivateChatScreen = () => {
   // Utilisation de useEffect pour appeler fetchUserInfo une seule fois lors du premier rendu
   useEffect(() => {
     fetchUserInfo();
-    socket.on('roomConnected', (data) => {
-      console.log(`PrivateChatScreen ; usersInRoomusersInRoomusersInRoom ${data.usersInRoom}`);
-
-      setSize(data.size)
-    });
-
-    console.log(`PrivateChatScreen ; data.sizedata.size :: ${size}`);
-
 
   }, []); // Le tableau vide [] garantit que l'effet est exécuté une seule fois au montage
 
