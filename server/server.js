@@ -73,16 +73,17 @@ app.get('/privetMessages', async (req, res) => {
 
 
 
+
 // Route pour la connexion de l'utilisateur
 app.post('/logins', async (req, res) => {
   
   try {
     const { username, password } = req.body;
-    const hashedPassword = await hashPassword(password);
-    const isMatch = await verifyPassword(password, hashedPassword);
 
     // Vérifie si l'utilisateur existe et si le mot de passe est correct
     const user = await WassapUser.findOne({ username });
+    const isMatch = await verifyPassword(password, user.password);
+
     if ((user.username!==username)|| (!isMatch)) {
       return res.status(400).json({ message: 'Invalid username or password' });
     }
