@@ -75,7 +75,7 @@ app.get('/privetMessages', async (req, res) => {
 
 
 // Route pour la connexion de l'utilisateur
-app.post('/logins', async (req, res) => {
+app.post('/login', async (req, res) => {
   
   try {
     const { username, password } = req.body;
@@ -96,7 +96,7 @@ app.post('/logins', async (req, res) => {
 
 
 // Route pour l'inscription d'un nouvel utilisateur
-app.post('/signups', async (req, res) => {
+app.post('/signup', async (req, res) => {
   try {
     const { username, password } = req.body;
     const hashedPassword = await hashPassword(password);
